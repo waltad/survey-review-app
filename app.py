@@ -15,6 +15,31 @@ df = pd.read_csv('35__welcome_survey_cleaned.csv', sep=';')
 
 c0, c1, c2 = st.columns(3)  # Create three columns for layout
 
+with st.sidebar:
+    age_categories = st.multiselect(
+        "Wybierz kategorie wiekowe",
+        sorted(df["age"].dropna().unique()),
+    )
+    edu_levels = st.multiselect(
+        "Wybierz poziomy wykształcenia",
+        sorted(df["edu_level"].dropna().unique()),
+    )
+    gender = st.radio(
+        "Wybierz płeć",
+        ("Wszyscy", "Kobiety", "Mężczyzni"),
+    )
+
+if age_categories:
+    df = df[df["age"].isin(age_categories)]
+
+if edu_levels:
+    df = df[df["edu_level"].isin(edu_levels)]
+
+if gender == "Kobiety":
+    df = df[df["gender"] == 1]
+elif gender == "Mężczyzni":
+    df = df[df["gender"] == 0]
+
 with c0:
     st.metric(label="Liczba uczestników", value=len(df))  # Display the number of unique participants
 with c1:
