@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 st.set_page_config(
     page_title="Ankieta powitalna", # Set the title of the page
@@ -50,3 +51,20 @@ with c2:
 st.subheader("Przykładowe dane z ankiety") # Set a subheader for the data section
 st.dataframe(df.head(5), hide_index=True)  # Display the first 5 rows of the DataFrame
 
+df_animals = df.groupby('fav_animals').size().reset_index(name='counts')
+fig = px.pie(df_animals, values='counts', names='fav_animals', title='Ulubione zwierzęta')
+fig.update_traces(hole=.3, textinfo='percent+label')
+fig.update_layout(
+    title_font_size=24,
+    legend_title_text='Ulubione zwierzęta',
+    legend=dict(
+        orientation="v",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    )
+)
+
+st.subheader("Ulubione zwierzęta")  # Set a subheader for the favorite animals section
+st.plotly_chart(fig, use_container_width=True)  # Display the pie chart of favorite animals
