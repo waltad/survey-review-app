@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from charts import create_pie_charts  # Import the function to create pie charts
 
 st.set_page_config(
     page_title="Ankieta powitalna", # Set the title of the page
@@ -66,5 +67,9 @@ fig.update_layout(
     )
 )
 
-st.subheader("Ulubione zwierzęta")  # Set a subheader for the favorite animals section
-st.plotly_chart(fig, use_container_width=True)  # Display the pie chart of favorite animals
+st.subheader("Analiza preferencji uczestników ankety")  # Set a subheader for the preferences section
+st.plotly_chart(create_pie_charts(df), use_container_width=True)  # Display the pie chart created in charts.py
+
+df_industry = df.groupby('industry').size().reset_index(name='counts')
+st.subheader("Branże, w których pracują uczestniy ankiety")  # Set a subheader for the industry preferences section
+st.bar_chart(df_industry.set_index('industry')['counts'], use_container_width=True)  # Display a bar chart of industry preferences
