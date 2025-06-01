@@ -49,21 +49,49 @@ def create_pie_charts(df, title_color="#4ECDC4"):
                .reset_index(name='counts')
                .rename(columns={'index': 'learning_method'})
                .sort_values('counts', ascending=False))
+    
+    motivation_columns = [
+    'motivation_career',
+    'motivation_challenges',
+    'motivation_creativity_and_innovation',
+    'motivation_money_and_job',
+    'motivation_personal_growth',
+    'motivation_remote'
+    ]
+    motivation_translation = {
+        'motivation_career': 'kariera',
+        'motivation_challenges': 'wyzwania',
+        'motivation_creativity_and_innovation': 'kreatywność i innowacje',
+        'motivation_money_and_job': 'pieniądze i praca',
+        'motivation_personal_growth': 'rozwój osobisty',
+        'motivation_remote': 'praca zdalna'
+    }
+    df_motivation = (df[motivation_columns]
+                    .rename(columns=motivation_translation)
+                    .sum()
+                    .reset_index(name='counts')
+                    .rename(columns={'index': 'motivation'})
+                    .sort_values('counts', ascending=False))
+    
+    df_tastes = df.groupby('sweet_or_salty').size().rename({'salty': 'słony', 'sweet': 'słodki'}).reset_index(name='counts')
 
     # Definition of color palettes for each chart
     color_palettes = {
         'hobby': ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3'],
         'learning': ['#6C5CE7', '#A29BFE', '#74B9FF', '#00B894', '#00CEC9', '#FDCB6E', '#E17055', '#FD79A8'],
         'animals': ['#FF7675', '#74B9FF', '#55A3FF', '#00B894', '#FDCB6E', '#FD79A8', '#E84393'],
-        'places': ['#00CEC9', '#6C5CE7', '#FDCB6E', '#E17055', '#00B894', '#FF7675', '#74B9FF']
+        'places': ['#00CEC9', '#6C5CE7', '#FDCB6E', '#E17055', '#00B894', '#FF7675', '#74B9FF'],
+        'motivation': ['#FF4757', '#3742FA', '#2ED573', '#FFA502', '#5352ED', '#FF3838', '#1E90FF', '#32CD32'],
+        'taste': ['#4682B4', '#FF69B4'],
     }
 
-    # Create a subplot with 2x2 layout for pie charts
+    # Create a subplot with 3x2 layout for pie charts
     fig = make_subplots(
-        rows=2, cols=2, 
-        specs=[[{'type':'domain'}, {'type':'domain'}], 
+        rows=3, cols=2, 
+        specs=[[{'type':'domain'}, {'type':'domain'}],
+            [{'type':'domain'}, {'type':'domain'}],
             [{'type':'domain'}, {'type':'domain'}]],
-        subplot_titles=['', '', '', '']  # Emty titles for subplots
+        subplot_titles=['', '', '', '', '', '']  # Emty titles for subplots
     )
 
     # Adding charts with individual color palettes and separate legends
@@ -71,7 +99,7 @@ def create_pie_charts(df, title_color="#4ECDC4"):
         go.Pie(
             labels=df_hobby['hobby'], 
             values=df_hobby['counts'], 
-            hole=.5,  # The hole for the pie chart
+            hole=.6,  # The hole for the pie chart
             name='Hobby',
             marker_colors=color_palettes['hobby'][:len(df_hobby)],
             textinfo='label+percent',
@@ -87,13 +115,13 @@ def create_pie_charts(df, title_color="#4ECDC4"):
         go.Pie(
             labels=df_learning['learning_method'], 
             values=df_learning['counts'], 
-            hole=.5,
+            hole=.6,
             name='Metody nauki',
             marker_colors=color_palettes['learning'][:len(df_learning)],
             textinfo='label+percent',
             textposition='outside',
             legendgroup='learning',
-            legendgrouptitle_text='Metody nauki',
+            legendgrouptitle_text='Preferowane metody nauki',
             showlegend=True
         ), 
         row=1, col=2
@@ -103,7 +131,7 @@ def create_pie_charts(df, title_color="#4ECDC4"):
         go.Pie(
             labels=df_animals['fav_animals'], 
             values=df_animals['counts'], 
-            hole=.5,
+            hole=.6,
             name='Ulubione zwierzęta',
             marker_colors=color_palettes['animals'][:len(df_animals)],
             textinfo='label+percent',
@@ -119,7 +147,7 @@ def create_pie_charts(df, title_color="#4ECDC4"):
         go.Pie(
             labels=df_place['fav_place'], 
             values=df_place['counts'], 
-            hole=.5,
+            hole=.6,
             name='Ulubione miejsca',
             marker_colors=color_palettes['places'][:len(df_place)],
             textinfo='label+percent',
@@ -130,6 +158,37 @@ def create_pie_charts(df, title_color="#4ECDC4"):
         ), 
         row=2, col=2
     )
+    fig.add_trace(
+        go.Pie(
+            labels=df_motivation['motivation'], 
+            values=df_motivation['counts'], 
+            hole=.6,
+            name='Motywacje',
+            marker_colors=color_palettes['motivation'][:len(df_motivation)],
+            textinfo='label+percent',
+            textposition='outside',
+            legendgroup='motivation',
+            legendgrouptitle_text='Motywacje',
+            showlegend=True
+        ), 
+        row=3, col=1
+    )
+
+    fig.add_trace(
+        go.Pie(
+            labels=df_tastes['sweet_or_salty'], 
+            values=df_tastes['counts'], 
+            hole=.6,
+            name='Preferowany smak',
+            marker_colors=color_palettes['taste'][:len(df_tastes)],
+            textinfo='label+percent',
+            textposition='outside',
+            legendgroup='sweet_or_salty',
+            legendgrouptitle_text='Preferowany smak',
+            showlegend=True
+        ), 
+        row=3, col=2
+    )
 
     # Upddating layout from titles in the center of each pie chart
     fig.update_layout(
@@ -138,13 +197,17 @@ def create_pie_charts(df, title_color="#4ECDC4"):
         title_font_size=20,
         # Titles in the center of each pie chart
         annotations=[
-            dict(text='<b>Hobby</b>', x=0.225, y=0.815, font_size=16, showarrow=False, 
+            dict(text='<b>Hobby</b>', x=0.225, y=0.89, font_size=16, showarrow=False, 
                 xanchor="center", yanchor="middle", font_color=title_color),
-            dict(text='<b>Metody<br>nauki</b>', x=0.775, y=0.815, font_size=16, showarrow=False, 
+            dict(text='<b>Preferowane<br>metody<br>nauki</b>', x=0.775, y=0.885, font_size=16, showarrow=False,
                 xanchor="center", yanchor="middle", font_color=title_color),
-            dict(text='<b>Ulubione<br>zwierzęta</b>', x=0.225, y=0.19, font_size=16, showarrow=False, 
+            dict(text='<b>Ulubione<br>zwierzęta</b>', x=0.225, y=0.505, font_size=16, showarrow=False, 
                 xanchor="center", yanchor="middle", font_color=title_color),
-            dict(text='<b>Ulubione<br>miejsca</b>', x=0.775, y=0.19, font_size=16, showarrow=False, 
+            dict(text='<b>Ulubione<br>miejsca</b>', x=0.775, y=0.505, font_size=16, showarrow=False, 
+                xanchor="center", yanchor="middle", font_color=title_color),
+            dict(text='<b>Motywacje</b>', x=0.225, y=0.115, font_size=16, showarrow=False, 
+                xanchor="center", yanchor="middle", font_color=title_color),
+            dict(text='<b>Preferowany<br>smak</b>', x=0.775, y=0.115, font_size=16, showarrow=False, 
                 xanchor="center", yanchor="middle", font_color=title_color)
         ],
         # Setting the legend properties
@@ -158,9 +221,32 @@ def create_pie_charts(df, title_color="#4ECDC4"):
             groupclick="toggleitem"
         ),
         # Margins and size adjustments
-        margin=dict(t=80, b=50, l=50, r=200),  # Increased right margin for legend
-        height=700,  # Increased height for better visibility
+        margin=dict(t=80, b=80, l=50, r=200),  # Increased right margin for legend
+        height=1050,  # Increased height for better visibility
         width=1200   # Increased width for better visibility
+    )
+
+    return fig
+
+def create_heatmap(df, title_color="#4ECDC4"):
+    # Create a heatmap of the correlation matrix
+    corr = df.corr(numeric_only=True).round(2) # Calculate the correlation matrix and round to 2 decimal places
+    fig = go.Figure(data=go.Heatmap(
+        z=corr.values,
+        x=corr.columns,
+        y=corr.columns,
+        colorscale='Viridis',
+        colorbar=dict(title='Korelacja'),
+        zmin=-1, zmax=1
+    ))
+
+    fig.update_layout(
+        title_text='Mapa cieplna korelacji', 
+        title_x=0.5,
+        title_font_size=20,
+        height=800,
+        width=800,
+        margin=dict(t=80, b=80, l=50, r=50),  # Adjust margins for better visibility
     )
 
     return fig
