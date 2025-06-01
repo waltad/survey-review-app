@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from charts import create_pie_charts  # Import the function to create pie charts
+from charts import create_pie_charts, create_heatmap  # Import the function to create pie charts
 
 st.set_page_config(
     page_title="Ankieta powitalna", # Set the title of the page
@@ -52,24 +52,38 @@ with c2:
 st.subheader("Przykładowe dane z ankiety") # Set a subheader for the data section
 st.dataframe(df.head(5), hide_index=True)  # Display the first 5 rows of the DataFrame
 
-df_animals = df.groupby('fav_animals').size().reset_index(name='counts')
-fig = px.pie(df_animals, values='counts', names='fav_animals', title='Ulubione zwierzęta')
-fig.update_traces(hole=.3, textinfo='percent+label')
-fig.update_layout(
-    title_font_size=24,
-    legend_title_text='Ulubione zwierzęta',
-    legend=dict(
-        orientation="v",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1
-    )
-)
-
 st.subheader("Analiza preferencji uczestników ankety")  # Set a subheader for the preferences section
 st.plotly_chart(create_pie_charts(df), use_container_width=True)  # Display the pie chart created in charts.py
 
 df_industry = df.groupby('industry').size().reset_index(name='counts')
 st.subheader("Branże, w których pracują uczestniy ankiety")  # Set a subheader for the industry preferences section
-st.bar_chart(df_industry.set_index('industry')['counts'], use_container_width=True)  # Display a bar chart of industry preferences
+st.bar_chart(
+    df_industry,
+    x='industry',
+    y='counts',
+    use_container_width=True,
+    x_label="Branża",  # Set the x-axis label
+    y_label="Ilość uczestników",  # Set the y-axis label
+)  # Display a bar chart of industry preferences
+
+df_experience = df.groupby('years_of_experience').size().reset_index(name='counts')
+st.subheader("Lata doświadczenia uczestników ankiety")  # Set a subheader for the experience section
+st.line_chart(
+    df_experience,
+    x='years_of_experience',
+    y='counts',
+    x_label="Lata doświadczenia",  # Set the x-axis label
+    y_label="Ilość uczestników",   # Set the y-axis label
+    use_container_width=True
+)  # Display a bar chart of years of experience
+
+# Corelation matrix
+st.subheader("Macierz korelacji")  # Set a subheader for the correlation matrix section
+st.write("Macierz korelacji między zmiennymi numerycznymi w ankiecie.")  # Description for the correlation matrix
+st.dataframe(df.corr(numeric_only=True), use_container_width=True)  # Display the correlation matrix as a DataFrame
+# Display the correlation matrix as a heatmap
+st.write("Macierz korelacji między zmiennymi numerycznymi w ankiecie jako wykres cieplny.")  # Description for the heatmap
+st.plotly_chart(
+    create_heatmap(df),
+    use_container_width=True
+)  # Display the correlation matrix as a heatmap
