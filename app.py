@@ -67,6 +67,12 @@ st.bar_chart(
 )  # Display a bar chart of industry preferences
 
 df_experience = df.groupby('years_of_experience').size().reset_index(name='counts')
+experience_order = ['0-2', '3-5', '6-10', '11-15', '>=16']
+df_experience['years_of_experience'] = pd.Categorical(
+    df_experience['years_of_experience'],
+    categories=experience_order,
+    ordered=True
+) # Set order the years of experience categories
 st.subheader("Lata doświadczenia uczestników ankiety")  # Set a subheader for the experience section
 st.line_chart(
     df_experience,
